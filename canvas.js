@@ -53,9 +53,25 @@ document.addEventListener('keyup', e => {
   keyPressed[e.key] = false;
 });
 
+function checkBorder(r) {
+  if (circlePos[0] - r <= 0) {
+    circlePos[0] = r;
+  }
+  if (circlePos[0] + r >= width) {
+    circlePos[0] = width - r;
+  }
+  if (circlePos[1] - r <= 0) {
+    circlePos[1] = r;
+  }
+  if (circlePos[1] + r >= height) {
+    circlePos[1] = height - r;
+  }
+}
+
 function moveCircle() {
-  clearCanvas()
+  clearCanvas();
   ctx.fillStyle = "rgb(0, 255, 255)";
+  checkBorder(30);
   drawCircle(circlePos[0], circlePos[1], 30);
   if (keyPressed['ArrowLeft']) { //left
     drawCircle(circlePos[0] - 3, circlePos[1], 30);
