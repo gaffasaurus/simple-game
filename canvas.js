@@ -23,6 +23,22 @@ function drawCircle(x, y, r) {
   circlePos.push(x);
   circlePos.push(y);
   circlePos.push(r);
+
+  ctx.fillStyle = "rgb(0, 0, 0)";
+
+  ctx.beginPath();
+  ctx.arc(x - r/2, y - r/6, 5, degToRad(0), degToRad(360), false);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + r/2, y - r/6, 5, degToRad(0), degToRad(360), false);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgb(0, 0, 0)";
+  ctx.beginPath();
+  ctx.moveTo(x - 7, y);
+  ctx.lineTo(x + 7, y);
+  ctx.stroke();
 }
 
 ctx.fillStyle = "rgb(0, 255, 255)";
