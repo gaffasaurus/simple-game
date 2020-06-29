@@ -9,6 +9,7 @@ class Enemy {
     this.ySpeed = ySpeed;
     this.position = [x, y];
     this.drawn = false;
+    this.frozen = false;
   }
 
   draw(x, y, r) {
@@ -84,12 +85,23 @@ class Enemy {
   }
 
   move() {
-    //clearCanvas(ctx);
     ctx.fillStyle = this.color;
     this.checkBorder();
     this.checkCollision();
-    this.draw(this.position[0] + this.xSpeed, this.position[1] + this.ySpeed, this.r);
-    this.position[0] += this.xSpeed;
-    this.position[1] += this.ySpeed;
+    if (!this.frozen) {
+      this.draw(this.position[0] + this.xSpeed, this.position[1] + this.ySpeed, this.r);
+      this.position[0] += this.xSpeed;
+      this.position[1] += this.ySpeed;
+    } else {
+      this.draw(this.position[0], this.position[1] + this.ySpeed, this.r);
+    }
+  }
+
+  freeze() {
+    this.frozen = true;
+  }
+
+  unfreeze() {
+    this.frozen = false;
   }
 }

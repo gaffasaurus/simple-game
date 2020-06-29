@@ -48,12 +48,22 @@
       outline: 3px solid black;
     }
 
+    .restart {
+      position: absolute;
+      visibility: hidden;
+      top: 60%;
+      left: 44%;
+      width: 150px;
+      height: 50px;
+      margin: auto;
+    }
+
   </style>
 </head>
 <body>
   <div class="header">
     <h1 id="score"> Score: 0 </h1>
-    <h2 id="lives"> Lives: 5 </h2>
+    <h2 id="lives"> Lives: 3 </h2>
   </div>
   <div class="canvas">
     <canvas class="myCanvas2">
@@ -62,6 +72,7 @@
     <canvas class="myCanvas">
 
     </canvas>
+    <button class="restart", onclick = "restart()", id="restart">Restart</button>
   </div>
 </body>
 <script src="enemy.js"></script>

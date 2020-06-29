@@ -9,7 +9,9 @@ canvas2.height = 550;
 const ctx2 = canvas2.getContext("2d");
 
 let score = 0;
-let lives = 5;
+let lives = 100;
+
+let isGameOver = false;
 
 function degToRad(degrees) {
   return degrees * Math.PI / 180;
@@ -26,7 +28,7 @@ function clearCanvas(ctx) {
 clearCanvas(ctx);
 
 const playerPos = [];
-function drawCircle(x, y, r) {
+function drawPlayer(x, y, r) {
   ctx.fillStyle = "rgb(0, 255, 255)";
   ctx.strokeStyle = "rgb(0, 0, 0)";
 
@@ -57,11 +59,16 @@ function drawCircle(x, y, r) {
 const playerRadius = 30;
 
 ctx.fillStyle = "rgb(0, 255, 255)";
-drawCircle(width/2, height/2, playerRadius);
+drawPlayer(width/2, height/2, playerRadius);
 
 //create enemies
-let enemy1 = new Enemy(100, 100, 30, "rgb(255, 0, 0)", 3, 5);
-let enemy2 = new Enemy(100, 100, 40, "rgb(128, 0, 128)", 6, 4);
+const enemies = [
+  new Enemy(100, 100, 30, "rgb(255, 0, 0)", 4, 6),
+  new Enemy(100, 100, 40, "rgb(128, 0, 128)", 6, 4),
+  new Enemy(width - 100, height - 100, 45, "rgb(255, 89, 0)", -5, -8),
+  new Enemy(width/2, height - 100, 20, "rgb(255, 255, 0)", 10, 2)
+]
+
 
 let keyPressed = {};
 
@@ -91,7 +98,7 @@ let foodLocations = [];
 let foodSize = 15;
 function drawFood(circleX, circleY, circleR) {
   if (foodLocations.length < 5) {
-    ctx2.fillStyle = "rgb(255, 0, 0)";
+    ctx2.fillStyle = "rgb(255, 110, 110)";
     ctx2.strokeStyle = "rgb(0, 0, 0)";
 
     let x = Math.floor(Math.random() * (width - 20)) + foodSize ;
@@ -118,7 +125,7 @@ function eatFood(r) {
       ctx2.clearRect(0, 0, width, height);
       foodLocations.splice(i, 1);
       for (j = 0; j < foodLocations.length; j++) {
-        ctx2.fillStyle = "rgb(255, 0, 0)";
+        ctx2.fillStyle = "rgb(255, 110, 110)";
         ctx2.strokeStyle = "rgb(0, 0, 0)"
         ctx2.fillRect(foodLocations[j]['x'], foodLocations[j]['y'], foodSize, foodSize);
         ctx2.strokeRect(foodLocations[j]['x'], foodLocations[j]['y'], foodSize, foodSize);
@@ -130,16 +137,87 @@ function eatFood(r) {
   }
 }
 
+function freezeEnemies() {
+  for (i = 0; i < enemies.length; i++) {
+    if (enemies[i].drawn) {
+      enemies[i].freeze();
+    }
+  }
+}
+
+function spawnBuffer() {
+  setTimeout(() => {
+    for (i = 0; i < enemies.length; i++) {
+      if (enemies[i].drawn) {
+        enemies[i].unfreeze();
+      }
+    }
+  }, 1500);
+}
+
 function loseLife() {
   lives--;
   document.getElementById("lives").innerHTML = "Lives: " + lives;
+  freezeEnemies();
+  if (lives == 0) {
+    isGameOver = true;
+    return;
+  }
+  spawnBuffer();
+}
+
+function displayGameOver() {
+  ctx.font = "60px sans-serif";
+  ctx.fillStyle = 'red';
+  ctx.strokeStyle = 'black';
+  ctx.textAlign = 'center';
+  ctx.fillText("GAME OVER! Score: " + score, width/2, height/2);
+  ctx.strokeText("GAME OVER! Score: " + score, width/2, height/2);
+  document.getElementById("restart").style.visibility = 'visible';
+}
+
+function restart() {
+  isGameOver = false;
+  score = 0;
+  lives = 3;
+  document.getElementById("score").innerHTML = "Score: " + score;
+  document.getElementById("lives").innerHTML = "Lives: " + lives;
+  // drawPlayer(width/2, height/2, playerRadius);
+  playerPos[0] = width/2;
+  playerPos[1] = height/2;
+  for (i = 0; i < enemies.length; i++) {
+    enemies[i].unfreeze();
+    enemies[i].position[0] = enemies[i].x;
+    enemies[i].position[1] = enemies[i].y;
+    enemies[i].drawn = false;
+  }
+  document.getElementById("restart").style.visibility = 'hidden';
+  loop();
 }
 
 setInterval(() => {
   drawFood(playerPos[0], playerPos[1], playerRadius)
 }, 1000);
 
-let playerSpeed = 3;
+let playerSpeed = 5;
+function movePlayer() {
+  if (keyPressed['ArrowLeft']) { //left
+    drawPlayer(playerPos[0] - playerSpeed, playerPos[1], playerRadius);
+    playerPos[0] -= playerSpeed;
+  }
+  if (keyPressed['ArrowUp']) { //up
+    drawPlayer(playerPos[0], playerPos[1] - playerSpeed, playerRadius);
+    playerPos[1] -= playerSpeed;
+  }
+  if (keyPressed['ArrowRight']) { //right
+    drawPlayer(playerPos[0] + playerSpeed, playerPos[1], playerRadius);
+    playerPos[0] += playerSpeed;
+  }
+  if (keyPressed['ArrowDown']) { //down
+    drawPlayer(playerPos[0], playerPos[1] + playerSpeed, playerRadius);
+    playerPos[1] += playerSpeed;
+  }
+}
 
 function loop() {
   clearCanvas(ctx);
@@ -147,22 +225,12 @@ function loop() {
   ctx.fillStyle = "rgb(0, 255, 255)";
   checkBorder(playerRadius);  //radius
   eatFood(playerRadius);
-  drawCircle(playerPos[0], playerPos[1], playerRadius);
-  if (keyPressed['ArrowLeft']) { //left
-    drawCircle(playerPos[0] - playerSpeed, playerPos[1], playerRadius);
-    playerPos[0] -= playerSpeed;
-  }
-  if (keyPressed['ArrowUp']) { //up
-    drawCircle(playerPos[0], playerPos[1] - playerSpeed, playerRadius);
-    playerPos[1] -= playerSpeed;
-  }
-  if (keyPressed['ArrowRight']) { //right
-    drawCircle(playerPos[0] + playerSpeed, playerPos[1], playerRadius);
-    playerPos[0] += playerSpeed;
-  }
-  if (keyPressed['ArrowDown']) { //down
-    drawCircle(playerPos[0], playerPos[1] + playerSpeed, playerRadius);
-    playerPos[1] += playerSpeed;
+  drawPlayer(playerPos[0], playerPos[1], playerRadius);
+  if (!isGameOver) {
+    movePlayer();
+  } else {
+    displayGameOver();
+    return;
   }
   window.requestAnimationFrame(loop);
 }
@@ -174,20 +242,34 @@ setInterval(() => {
 }, 500);
 
 function drawEnemies() {
-  if (score >= 1 && !enemy1.drawn) {
-    enemy1.draw(enemy1.x, enemy1.y, enemy1.r);
+  if (score >= 5 && !enemies[0].drawn) {
+    enemies[0].draw(enemies[0].x, enemies[0].y, enemies[0].r);
+    enemies[0].freeze();
+    spawnBuffer();
   }
-  if (score >= 25 && !enemy2.drawn) {
-    enemy2.draw(enemy2.x, enemy2.y, enemy2.r);
+  if (score >= 20 && !enemies[1].drawn) {
+    enemies[1].draw(enemies[1].x, enemies[1].y, enemies[1].r);
+    enemies[1].freeze();
+    spawnBuffer();
+  }
+  if (score >= 35 && !enemies[2].drawn) {
+    enemies[2].draw(enemies[2].x, enemies[2].y, enemies[2].r);
+    enemies[2].freeze();
+    spawnBuffer();
+  }
+  if (score >= 50 && !enemies[3].drawn) {
+    enemies[3].draw(enemies[3].x, enemies[3].y, enemies[3].r);
+    enemies[3].freeze();
+    spawnBuffer();
   }
 }
 
 function moveEnemies() {
-  if (enemy1.drawn) {
-    enemy1.move();
-  }
-  if (enemy2.drawn) {
-    enemy2.move();
+  console.log(enemies[0].drawn);
+  for (i = 0; i < enemies.length; i++) {
+    if (enemies[i].drawn) {
+      enemies[i].move();
+    }
   }
 
 }
