@@ -265,7 +265,6 @@ function drawEnemies() {
 }
 
 function moveEnemies() {
-  console.log(enemies[0].drawn);
   for (i = 0; i < enemies.length; i++) {
     if (enemies[i].drawn) {
       enemies[i].move();
