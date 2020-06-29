@@ -9,7 +9,7 @@ canvas2.height = 550;
 const ctx2 = canvas2.getContext("2d");
 
 let score = 0;
-let lives = 100;
+let lives = 3;
 
 let isGameOver = false;
 
