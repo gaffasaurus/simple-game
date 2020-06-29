@@ -90,7 +90,7 @@ function checkBorder(r) {
 let foodLocations = [];
 let foodSize = 15;
 function drawFood(circleX, circleY, circleR) {
-  if (foodLocations.length < 4) {
+  if (foodLocations.length < 5) {
     ctx2.fillStyle = "rgb(255, 0, 0)";
     ctx2.strokeStyle = "rgb(0, 0, 0)";
 
