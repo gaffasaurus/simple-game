@@ -8,6 +8,9 @@ canvas2.width = 950;
 canvas2.height = 550;
 const ctx2 = canvas2.getContext("2d");
 
+let score = 0;
+let lives = 5;
+
 function degToRad(degrees) {
   return degrees * Math.PI / 180;
 }
@@ -22,7 +25,7 @@ function clearCanvas(ctx) {
 
 clearCanvas(ctx);
 
-const circlePos = [];
+const playerPos = [];
 function drawCircle(x, y, r) {
   ctx.fillStyle = "rgb(0, 255, 255)";
   ctx.strokeStyle = "rgb(0, 0, 0)";
@@ -31,9 +34,9 @@ function drawCircle(x, y, r) {
   ctx.arc(x, y, r, degToRad(0), degToRad(360), false);
   ctx.fill();
   ctx.stroke();
-  circlePos.push(x);
-  circlePos.push(y);
-  circlePos.push(r);
+  playerPos.push(x);
+  playerPos.push(y);
+  playerPos.push(r);
 
   ctx.fillStyle = "rgb(0, 0, 0)";
 
@@ -51,9 +54,14 @@ function drawCircle(x, y, r) {
   ctx.stroke();
 }
 
+const playerRadius = 30;
 
 ctx.fillStyle = "rgb(0, 255, 255)";
-drawCircle(width/2, height/2, 30);
+drawCircle(width/2, height/2, playerRadius);
+
+//create enemies
+let enemy1 = new Enemy(100, 100, 30, "rgb(255, 0, 0)", 3, 5);
+let enemy2 = new Enemy(100, 100, 40, "rgb(128, 0, 128)", 6, 4);
 
 let keyPressed = {};
 
@@ -65,37 +73,38 @@ document.addEventListener('keyup', e => {
 });
 
 function checkBorder(r) {
-  if (circlePos[0] - r <= 0) {
-    circlePos[0] = r;
+  if (playerPos[0] - r <= 0) {
+    playerPos[0] = r;
   }
-  if (circlePos[0] + r >= width) {
-    circlePos[0] = width - r;
+  if (playerPos[0] + r >= width) {
+    playerPos[0] = width - r;
   }
-  if (circlePos[1] - r <= 0) {
-    circlePos[1] = r;
+  if (playerPos[1] - r <= 0) {
+    playerPos[1] = r;
   }
-  if (circlePos[1] + r >= height) {
-    circlePos[1] = height - r;
+  if (playerPos[1] + r >= height) {
+    playerPos[1] = height - r;
   }
 }
 
 let foodLocations = [];
+let foodSize = 15;
 function drawFood(circleX, circleY, circleR) {
   if (foodLocations.length < 4) {
     ctx2.fillStyle = "rgb(255, 0, 0)";
     ctx2.strokeStyle = "rgb(0, 0, 0)";
 
-    let x = Math.floor(Math.random() * (width - 20)) + 10;
-    while (between(x + 10, circleX - circleR, circleX + circleR)) {
-      x = Math.floor(Math.random() * (width - 20)) + 10;
+    let x = Math.floor(Math.random() * (width - 20)) + foodSize ;
+    while (between(x + foodSize , circleX - circleR, circleX + circleR)) {
+      x = Math.floor(Math.random() * (width - 20)) + foodSize ;
     }
 
-    let y = Math.floor(Math.random() * (height - 20)) + 10;
-    while (between(y + 10, circleY - circleR, circleY + circleR)) {
-      y = Math.floor(Math.random() * (height - 20)) + 10;
+    let y = Math.floor(Math.random() * (height - 20)) + foodSize ;
+    while (between(y + foodSize , circleY - circleR, circleY + circleR)) {
+      y = Math.floor(Math.random() * (height - 20)) + foodSize ;
     }
-    console.log(x + ", " + y);
-    ctx2.fillRect(x, y, 10, 10);
+    ctx2.fillRect(x, y, foodSize , foodSize);
+    ctx2.strokeRect(x, y, foodSize , foodSize)
     foodLocations.push({
       x: x,
       y: y
@@ -103,47 +112,82 @@ function drawFood(circleX, circleY, circleR) {
   }
 }
 
-setInterval(() => {
-  drawFood(circlePos[0], circlePos[1], 30)
-}, 1000);
-
-function moveCircle() {
-  clearCanvas(ctx);
-  ctx.fillStyle = "rgb(0, 255, 255)";
-  checkBorder(30);  //radius
-  eatFood(30);
-  drawCircle(circlePos[0], circlePos[1], 30);
-  if (keyPressed['ArrowLeft']) { //left
-    drawCircle(circlePos[0] - 3, circlePos[1], 30);
-    circlePos[0] -= 3;
-  }
-  if (keyPressed['ArrowUp']) { //up
-    drawCircle(circlePos[0], circlePos[1] - 3, 30);
-    circlePos[1] -=3;
-  }
-  if (keyPressed['ArrowRight']) { //right
-    drawCircle(circlePos[0] + 3, circlePos[1], 30);
-    circlePos[0] +=3;
-  }
-  if (keyPressed['ArrowDown']) { //down
-    drawCircle(circlePos[0], circlePos[1] + 3, 30);
-    circlePos[1] +=3;
-  }
-  window.requestAnimationFrame(moveCircle);
-}
-
-moveCircle();
-
 function eatFood(r) {
   for (i = 0; i < foodLocations.length; i++) {
-    if (between(foodLocations[i]['x'], circlePos[0] - r, circlePos[0] + r) && (between(foodLocations[i]['y'], circlePos[1] - r, circlePos[1] + r))) {
+    if ((between(foodLocations[i]['x'], playerPos[0] - r - foodSize, playerPos[0] + r)) && (between(foodLocations[i]['y'], playerPos[1] - r - foodSize, playerPos[1] + r))) {
       ctx2.clearRect(0, 0, width, height);
       foodLocations.splice(i, 1);
       for (j = 0; j < foodLocations.length; j++) {
         ctx2.fillStyle = "rgb(255, 0, 0)";
-        ctx2.fillRect(foodLocations[j]['x'], foodLocations[j]['y'], 10, 10);
+        ctx2.strokeStyle = "rgb(0, 0, 0)"
+        ctx2.fillRect(foodLocations[j]['x'], foodLocations[j]['y'], foodSize, foodSize);
+        ctx2.strokeRect(foodLocations[j]['x'], foodLocations[j]['y'], foodSize, foodSize);
       }
+      score++;
+      document.getElementById("score").innerHTML = "Score: " + score;
       break;
     }
   }
+}
+
+function loseLife() {
+  lives--;
+  document.getElementById("lives").innerHTML = "Lives: " + lives;
+}
+
+setInterval(() => {
+  drawFood(playerPos[0], playerPos[1], playerRadius)
+}, 1000);
+
+let playerSpeed = 3;
+
+function loop() {
+  clearCanvas(ctx);
+  moveEnemies();
+  ctx.fillStyle = "rgb(0, 255, 255)";
+  checkBorder(playerRadius);  //radius
+  eatFood(playerRadius);
+  drawCircle(playerPos[0], playerPos[1], playerRadius);
+  if (keyPressed['ArrowLeft']) { //left
+    drawCircle(playerPos[0] - playerSpeed, playerPos[1], playerRadius);
+    playerPos[0] -= playerSpeed;
+  }
+  if (keyPressed['ArrowUp']) { //up
+    drawCircle(playerPos[0], playerPos[1] - playerSpeed, playerRadius);
+    playerPos[1] -= playerSpeed;
+  }
+  if (keyPressed['ArrowRight']) { //right
+    drawCircle(playerPos[0] + playerSpeed, playerPos[1], playerRadius);
+    playerPos[0] += playerSpeed;
+  }
+  if (keyPressed['ArrowDown']) { //down
+    drawCircle(playerPos[0], playerPos[1] + playerSpeed, playerRadius);
+    playerPos[1] += playerSpeed;
+  }
+  window.requestAnimationFrame(loop);
+}
+
+loop();
+
+setInterval(() => {
+  drawEnemies();
+}, 500);
+
+function drawEnemies() {
+  if (score >= 1 && !enemy1.drawn) {
+    enemy1.draw(enemy1.x, enemy1.y, enemy1.r);
+  }
+  if (score >= 25 && !enemy2.drawn) {
+    enemy2.draw(enemy2.x, enemy2.y, enemy2.r);
+  }
+}
+
+function moveEnemies() {
+  if (enemy1.drawn) {
+    enemy1.move();
+  }
+  if (enemy2.drawn) {
+    enemy2.move();
+  }
+
 }
