@@ -201,19 +201,19 @@ setInterval(() => {
 
 let playerSpeed = 5;
 function movePlayer() {
-  if (keyPressed['ArrowLeft']) { //left
+  if (keyPressed['ArrowLeft'] || keyPressed['a']) { //left
     drawPlayer(playerPos[0] - playerSpeed, playerPos[1], playerRadius);
     playerPos[0] -= playerSpeed;
   }
-  if (keyPressed['ArrowUp']) { //up
+  if (keyPressed['ArrowUp'] || keyPressed['w']) { //up
     drawPlayer(playerPos[0], playerPos[1] - playerSpeed, playerRadius);
     playerPos[1] -= playerSpeed;
   }
-  if (keyPressed['ArrowRight']) { //right
+  if (keyPressed['ArrowRight'] || keyPressed['d']) { //right
     drawPlayer(playerPos[0] + playerSpeed, playerPos[1], playerRadius);
     playerPos[0] += playerSpeed;
   }
-  if (keyPressed['ArrowDown']) { //down
+  if (keyPressed['ArrowDown'] || keyPressed['s']) { //down
     drawPlayer(playerPos[0], playerPos[1] + playerSpeed, playerRadius);
     playerPos[1] += playerSpeed;
   }
